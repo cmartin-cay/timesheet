@@ -50,16 +50,12 @@ class MyWindow(Frame, Timer):
         self.filemenu.add_command(label='Update Timesheet', command=self.append)
         self.b1 = Button(self, text="Start", command=self.time_start)
         self.b2 = Button(self, text="Stop", state=DISABLED, command=self.time_stop)
-        # self.s1 = Button(self, text="Save", command=self.write)
-        # self.s2 = Button(self, text="Update", command=self.append)
         self.c = ttk.Combobox(self, state=NORMAL)
         self.c['values'] = sorted(CLIENTS)
         self.c.bind('<<ComboboxSelected>>', self.client)
         self.c.grid(columnspan=2)
         self.b1.grid(sticky=W, row=1, column=0)
         self.b2.grid(sticky=E, row=1, column=1)
-        # self.s1.grid(sticky=W, row=2, column=0)
-        # self.s2.grid(sticky=E, row=2, column=1)
         master.configure(menu=self.menubar)
 
     def time_start(self):
