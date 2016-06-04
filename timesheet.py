@@ -44,11 +44,11 @@ class MyWindow(Frame, Timer):
     def __init__(self, master):
         Frame.__init__(self, master)
         self.top_menu()
-        self.b1 = Button(self, text="Start", command=self.time_start)
-        self.b2 = Button(self, text="Stop", state=DISABLED, command=self.time_stop)
         self.c = ttk.Combobox(self, state=NORMAL)
         self.c['values'] = sorted(CLIENTS)
         self.c.bind('<<ComboboxSelected>>', self.client)
+        self.b1 = Button(self, text="Start", command=self.time_start)
+        self.b2 = Button(self, text="Stop", state=DISABLED, command=self.time_stop)
         self.c.grid(columnspan=2)
         self.b1.grid(sticky=W, row=1, column=0)
         self.b2.grid(sticky=E, row=1, column=1)
@@ -62,8 +62,33 @@ class MyWindow(Frame, Timer):
         self.filemenu.add_command(label='New Timesheet', command=self.write)
         self.filemenu.add_command(label='Update Timesheet', command=self.append)
         self.menubar.add_cascade(label='Edit', menu=self.editbar)
-        self.editbar.add_command(label='Manual adjustment')
+        self.editbar.add_command(label='Manual adjustment', command=self.create_window)
 
+
+
+    def create_window(self):
+        t = Toplevel(self, width=250, height=100)
+        t.title=('Change time')
+        self.c1 = ttk.Combobox(t, state=NORMAL)
+        self.c1['values'] = sorted(CLIENTS)
+        self.c1.bind('<<ComboboxSelected>>', self.client1)
+        self.my_label = Label(t, text="Enter time")
+        self.my_entry = Entry(t, width=4)
+        b3 = Button(t, text='Update', command=self.update)
+        b4 = Button(t, text='Close', command=t.destroy)
+        self.c1.pack(side='top')
+        self.my_label.pack(side='left')
+        self.my_entry.pack(side='left')
+        b3.pack(side='left')
+        b4.pack(side='right')
+
+    def close_window(self):
+        self.destroy()
+
+    def update(self):
+        print(self.client1(self))
+        print(self.my_entry.get())
+        WORKLIST[self.client1(self)] += int(self.my_entry.get())
 
     def time_start(self):
         """
@@ -92,6 +117,10 @@ class MyWindow(Frame, Timer):
 
     def client(self, args):
         return self.c.get()
+
+    def client1(self, args):
+        return self.c1.get()
+
 
     @staticmethod
     def write():
@@ -123,3 +152,4 @@ def main():
 
 
 main()
+print(WORKLIST)
