@@ -3,7 +3,7 @@ Simple timesheet tool to keep track of clients worked
 on during the day.
 """
 from tkinter import *
-from tkinter import ttk, filedialog
+from tkinter import ttk, filedialog, messagebox
 from datetime import datetime
 from collections import defaultdict
 import csv
@@ -64,11 +64,9 @@ class MyWindow(Frame, Timer):
         self.menubar.add_cascade(label='Edit', menu=self.editbar)
         self.editbar.add_command(label='Manual adjustment', command=self.create_window)
 
-
-
     def create_window(self):
         t = Toplevel(self, width=250, height=100)
-        t.title=('Change time')
+        t.title = ('Change time')
         self.c1 = ttk.Combobox(t, state=NORMAL)
         self.c1['values'] = sorted(CLIENTS)
         self.c1.bind('<<ComboboxSelected>>', self.client1)
@@ -82,13 +80,13 @@ class MyWindow(Frame, Timer):
         b3.pack(side='left')
         b4.pack(side='right')
 
-    def close_window(self):
-        self.destroy()
-
     def update(self):
-        print(self.client1(self))
-        print(self.my_entry.get())
-        WORKLIST[self.client1(self)] += int(self.my_entry.get())
+        try:
+            float(self.my_entry.get())
+            WORKLIST[self.client1(self)] += float(self.my_entry.get())
+        except ValueError:
+            messagebox.showinfo(title="Warning", message="Please enter a number")
+
 
     def time_start(self):
         """
@@ -121,7 +119,6 @@ class MyWindow(Frame, Timer):
     def client1(self, args):
         return self.c1.get()
 
-
     @staticmethod
     def write():
         open_file = str(filedialog.asksaveasfilename(defaultextension='.csv', initialdir=os.getcwd()))
@@ -152,4 +149,3 @@ def main():
 
 
 main()
-print(WORKLIST)
