@@ -65,6 +65,7 @@ class MyWindow(Frame, Timer):
         self.editbar.add_command(label='Manual adjustment', command=self.create_window)
 
     def create_window(self):
+        """Creates the child window for Manual Entries"""
         t = Toplevel(self, width=250, height=100)
         t.title = ('Change time')
         self.c1 = ttk.Combobox(t, state=NORMAL)
