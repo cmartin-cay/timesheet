@@ -73,7 +73,7 @@ class MyWindow(Frame, Timer):
         self.c1.bind('<<ComboboxSelected>>', self.client1)
         self.my_label = Label(t, text="Enter time")
         self.my_entry = Entry(t, width=4)
-        b3 = Button(t, text='Update', command=self.update)
+        b3 = Button(t, text='Update', command=self.update_worklist_helper)
         b4 = Button(t, text='Close', command=t.destroy)
         self.c1.pack(side='top')
         self.my_label.pack(side='left')
@@ -81,12 +81,28 @@ class MyWindow(Frame, Timer):
         b3.pack(side='left')
         b4.pack(side='right')
 
-    def update(self):
+    def update_worklist_helper(self):
+       """
+       Wrapper to pass function update_worklist to tkinter command
+       """
+       time = None
+       customer = None
+       self.update_worklist(time, customer)
+
+
+    def update_worklist(self, time, customer):
+        """
+        Update the WORKLIST with a manual entry
+
+        """
+        time = self.my_entry.get()
+        customer = self.client1(self)
         try:
-            float(self.my_entry.get())
-            WORKLIST[self.client1(self)] += float(self.my_entry.get())
+            float(time)
+            WORKLIST[customer] += float(time)
         except ValueError:
             messagebox.showinfo(title="Warning", message="Please enter a number")
+        print(WORKLIST)
 
 
     def time_start(self):
