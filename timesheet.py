@@ -8,7 +8,6 @@ from datetime import datetime
 from collections import defaultdict
 import csv
 import os
-import time
 
 CLIENTS = ("Boathouse Row I", "Boathouse Row II",
            "PMSMF", "PMSF", "PMSF(L)", "PMSF US LP", "Tewks",
@@ -38,6 +37,11 @@ class Timer:
     def elapsed_time(self):
         """Return the time between start and stop in seconds"""
         return (self.stop - self.start).seconds
+
+    @property
+    def split_time(self):
+        """Return the between start and now in seconds. Does not stop the clock"""
+        return (datetime.now() - self.start).seconds
 
 class MyWindow(Frame, Timer):
     """
