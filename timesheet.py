@@ -8,6 +8,7 @@ from datetime import datetime
 from collections import defaultdict
 import csv
 import os
+import time
 
 CLIENTS = ("Boathouse Row I", "Boathouse Row II",
            "PMSMF", "PMSF", "PMSF(L)", "PMSF US LP", "Tewks",
@@ -17,23 +18,26 @@ WORKLIST = defaultdict(float)
 
 class Timer:
     """
-    Calcuates the elapsed time in increments of 0.1 hours
-    between 2 datetime objects
+    Returns the elapsed time in seconds between
+    2 datetime objects
     """
 
     def __init__(self):
         self.start = None
-        self.elapsed_time = None
+        self.stop = None
 
     def time_start(self):
         """Starts the timer"""
         self.start = datetime.now()
 
     def time_stop(self):
-        """Stops the timer"""
-        self.elapsed_time = (datetime.now() - self.start).seconds
-        self.start = None
+        """Stops the timer, resets the state time to zero"""
+        self.stop = datetime.now()
 
+    @property
+    def elapsed_time(self):
+        """Return the time between start and stop in seconds"""
+        return (self.stop - self.start).seconds
 
 class MyWindow(Frame, Timer):
     """
@@ -93,7 +97,6 @@ class MyWindow(Frame, Timer):
     def update_worklist(self, time, customer):
         """
         Update the WORKLIST with a manual entry
-
         """
         time = self.my_entry.get()
         customer = self.client1(self)
@@ -102,7 +105,6 @@ class MyWindow(Frame, Timer):
             WORKLIST[customer] += float(time)
         except ValueError:
             messagebox.showinfo(title="Warning", message="Please enter a number")
-        print(WORKLIST)
 
     def time_start(self):
         """
