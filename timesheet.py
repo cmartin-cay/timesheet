@@ -43,6 +43,7 @@ class Timer:
         """Return the between start and now in seconds. Does not stop the clock"""
         return (datetime.now() - self.start).seconds
 
+
 class MyWindow(Frame, Timer):
     """
     Main Tkinter window. Probably. Don't really know much
@@ -68,14 +69,14 @@ class MyWindow(Frame, Timer):
         self.editbar = Menu(self, tearoff=False)
         self.menubar.add_cascade(label='File', menu=self.filemenu)
         self.filemenu.add_command(label='New Timesheet', command=self.write)
-        self.filemenu.add_command(label='Update Timesheet', command=self.append)
+        self.filemenu.add_command(label='Save Timesheet', command=self.write)
         self.menubar.add_cascade(label='Edit', menu=self.editbar)
-        self.editbar.add_command(label='Manual adjustment', command=self.create_window)
+        self.editbar.add_command(label='Manual adjustment', command=self.manual_entry_window)
 
-    def create_window(self):
+    def manual_entry_window(self):
         """Creates the child window for Manual Entries"""
         t = Toplevel(self, width=250, height=100)
-        t.title = ('Change time')
+        t.title = 'Change time'
         self.c1 = ttk.Combobox(t, state=NORMAL)
         self.c1['values'] = sorted(CLIENTS)
         self.c1.bind('<<ComboboxSelected>>', self.client_manual)
@@ -90,14 +91,13 @@ class MyWindow(Frame, Timer):
         b4.pack(side='right')
 
     def update_worklist_helper(self):
-       """
-       Wrapper to pass function update_worklist to tkinter command
-       Tkinter won't allow parameters
-       """
-       time = None
-       customer = None
-       self.update_worklist(time, customer)
-
+        """
+        Wrapper to pass function update_worklist to tkinter command
+        Tkinter won't allow parameters
+        """
+        time = None
+        customer = None
+        self.update_worklist(time, customer)
 
     def update_worklist(self, time, customer):
         """
@@ -146,27 +146,22 @@ class MyWindow(Frame, Timer):
 
     @staticmethod
     def write():
-        open_file = str(filedialog.asksaveasfilename(defaultextension='.csv', initialdir=os.getcwd()))
-        if open_file:
-            """
-            Format explainer:
-            %A = Weekday full name
-            %d = Day with padded zero eg (01,02,...,30,31)
-            %B = Month full name
-            """
-            day = datetime.now().strftime("%A %d %B")
-            with open(open_file, 'w', newline='') as csvfile:
+        file_path = str(filedialog.asksaveasfilename(defaultextension='.csv', initialdir=os.getcwd()))
+        """
+        Format explainer:
+        %A = Weekday full name
+        %d = Day with padded zero eg (01,02,...,30,31)
+        %B = Month full name
+        """
+        day = datetime.now().strftime("%A %d %B")
+        is_new_file = False
+        if file_path:
+            if not os.path.isfile(file_path):
+                is_new_file = True
+            with open(file_path, 'a', newline='') as csvfile:
                 writer = csv.writer(csvfile, delimiter=",")
-                for key, val in WORKLIST.items():
-                    writer.writerow([day, key, val])
-
-    @staticmethod
-    def append():
-        open_file = str(filedialog.askopenfilename(defaultextension='.csv', initialdir=os.getcwd()))
-        if open_file:
-            day = datetime.now().strftime("%A %d %B")
-            with open(open_file, 'a', newline='') as csvfile:
-                writer = csv.writer(csvfile, delimiter=",")
+                if is_new_file:
+                    writer.writerow(["Day", "Client", "Time"])
                 for key, val in WORKLIST.items():
                     writer.writerow([day, key, val])
 
