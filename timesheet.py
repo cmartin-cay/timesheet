@@ -17,22 +17,31 @@ WORKLIST = defaultdict(float)
 
 class Timer:
     """
-    Calcuates the elapsed time in increments of 0.1 hours
-    between 2 datetime objects
+    Returns the elapsed time in seconds between
+    2 datetime objects
     """
 
     def __init__(self):
         self.start = None
-        self.elapsed_time = None
+        self.stop = None
 
     def time_start(self):
         """Starts the timer"""
         self.start = datetime.now()
 
     def time_stop(self):
-        """Stops the timer"""
-        self.elapsed_time = (datetime.now() - self.start).seconds
-        self.start = None
+        """Stops the timer, resets the state time to zero"""
+        self.stop = datetime.now()
+
+    @property
+    def elapsed_time(self):
+        """Return the time between start and stop in seconds"""
+        return (self.stop - self.start).seconds
+
+    @property
+    def split_time(self):
+        """Return the between start and now in seconds. Does not stop the clock"""
+        return (datetime.now() - self.start).seconds
 
 
 class MyWindow(Frame, Timer):
@@ -60,20 +69,20 @@ class MyWindow(Frame, Timer):
         self.editbar = Menu(self, tearoff=False)
         self.menubar.add_cascade(label='File', menu=self.filemenu)
         self.filemenu.add_command(label='New Timesheet', command=self.write)
-        self.filemenu.add_command(label='Update Timesheet', command=self.append)
+        self.filemenu.add_command(label='Save Timesheet', command=self.write)
         self.menubar.add_cascade(label='Edit', menu=self.editbar)
-        self.editbar.add_command(label='Manual adjustment', command=self.create_window)
+        self.editbar.add_command(label='Manual adjustment', command=self.manual_entry_window)
 
-    def create_window(self):
+    def manual_entry_window(self):
         """Creates the child window for Manual Entries"""
         t = Toplevel(self, width=250, height=100)
-        t.title = ('Change time')
+        t.title = 'Change time'
         self.c1 = ttk.Combobox(t, state=NORMAL)
         self.c1['values'] = sorted(CLIENTS)
-        self.c1.bind('<<ComboboxSelected>>', self.client1)
+        self.c1.bind('<<ComboboxSelected>>', self.client_manual)
         self.my_label = Label(t, text="Enter time")
         self.my_entry = Entry(t, width=4)
-        b3 = Button(t, text='Update', command=self.update)
+        b3 = Button(t, text='Update', command=self.update_worklist_helper)
         b4 = Button(t, text='Close', command=t.destroy)
         self.c1.pack(side='top')
         self.my_label.pack(side='left')
@@ -81,10 +90,24 @@ class MyWindow(Frame, Timer):
         b3.pack(side='left')
         b4.pack(side='right')
 
-    def update(self):
+    def update_worklist_helper(self):
+        """
+        Wrapper to pass function update_worklist to tkinter command
+        Tkinter won't allow parameters
+        """
+        time = None
+        customer = None
+        self.update_worklist(time, customer)
+
+    def update_worklist(self, time, customer):
+        """
+        Update the WORKLIST with a manual entry
+        """
+        time = self.my_entry.get()
+        customer = self.client_manual(self)
         try:
-            float(self.my_entry.get())
-            WORKLIST[self.client1(self)] += float(self.my_entry.get())
+            float(time)
+            WORKLIST[customer] += float(time)
         except ValueError:
             messagebox.showinfo(title="Warning", message="Please enter a number")
 
@@ -114,28 +137,31 @@ class MyWindow(Frame, Timer):
         WORKLIST[self.client(self)] += round(self.elapsed_time / 3600, 1)
 
     def client(self, args):
+        """Returns the value from Combobox"""
         return self.c.get()
 
-    def client1(self, args):
+    def client_manual(self, args):
+        """Returns the value from Manual Entry Combobox"""
         return self.c1.get()
 
     @staticmethod
     def write():
-        open_file = str(filedialog.asksaveasfilename(defaultextension='.csv', initialdir=os.getcwd()))
-        if open_file:
-            day = datetime.now().strftime("%A %d %B")
-            with open(open_file, 'w', newline='') as csvfile:
+        file_path = str(filedialog.asksaveasfilename(defaultextension='.csv', initialdir=os.getcwd()))
+        """
+        Format explainer:
+        %A = Weekday full name
+        %d = Day with padded zero eg (01,02,...,30,31)
+        %B = Month full name
+        """
+        day = datetime.now().strftime("%A %d %B")
+        is_new_file = False
+        if file_path:
+            if not os.path.isfile(file_path):
+                is_new_file = True
+            with open(file_path, 'a', newline='') as csvfile:
                 writer = csv.writer(csvfile, delimiter=",")
-                for key, val in WORKLIST.items():
-                    writer.writerow([day, key, val])
-
-    @staticmethod
-    def append():
-        open_file = str(filedialog.askopenfilename(defaultextension='.csv', initialdir=os.getcwd()))
-        if open_file:
-            day = datetime.now().strftime("%A %d %B")
-            with open(open_file, 'a', newline='') as csvfile:
-                writer = csv.writer(csvfile, delimiter=",")
+                if is_new_file:
+                    writer.writerow(["Day", "Client", "Time"])
                 for key, val in WORKLIST.items():
                     writer.writerow([day, key, val])
 
