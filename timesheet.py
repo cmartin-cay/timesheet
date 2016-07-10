@@ -78,7 +78,7 @@ class MyWindow(Frame, Timer):
         t.title = ('Change time')
         self.c1 = ttk.Combobox(t, state=NORMAL)
         self.c1['values'] = sorted(CLIENTS)
-        self.c1.bind('<<ComboboxSelected>>', self.client1)
+        self.c1.bind('<<ComboboxSelected>>', self.client_manual)
         self.my_label = Label(t, text="Enter time")
         self.my_entry = Entry(t, width=4)
         b3 = Button(t, text='Update', command=self.update_worklist_helper)
@@ -92,6 +92,7 @@ class MyWindow(Frame, Timer):
     def update_worklist_helper(self):
        """
        Wrapper to pass function update_worklist to tkinter command
+       Tkinter won't allow parameters
        """
        time = None
        customer = None
@@ -103,7 +104,7 @@ class MyWindow(Frame, Timer):
         Update the WORKLIST with a manual entry
         """
         time = self.my_entry.get()
-        customer = self.client1(self)
+        customer = self.client_manual(self)
         try:
             float(time)
             WORKLIST[customer] += float(time)
@@ -136,15 +137,23 @@ class MyWindow(Frame, Timer):
         WORKLIST[self.client(self)] += round(self.elapsed_time / 3600, 1)
 
     def client(self, args):
+        """Returns the value from Combobox"""
         return self.c.get()
 
-    def client1(self, args):
+    def client_manual(self, args):
+        """Returns the value from Manual Entry Combobox"""
         return self.c1.get()
 
     @staticmethod
     def write():
         open_file = str(filedialog.asksaveasfilename(defaultextension='.csv', initialdir=os.getcwd()))
         if open_file:
+            """
+            Format explainer:
+            %A = Weekday full name
+            %d = Day with padded zero eg (01,02,...,30,31)
+            %B = Month full name
+            """
             day = datetime.now().strftime("%A %d %B")
             with open(open_file, 'w', newline='') as csvfile:
                 writer = csv.writer(csvfile, delimiter=",")
