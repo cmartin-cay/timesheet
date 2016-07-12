@@ -12,10 +12,10 @@ import os
 CLIENTS = ("Boathouse Row I", "Boathouse Row II",
            "PMSMF", "PMSF", "PMSF(L)", "PMSF US LP", "Tewks",
            "CitcoOne", "Admin", "Training", "AOL", "NPIC")
-WORKLIST = defaultdict(float)
-# cust = ("Client1", "Client2")
-# tims = (1.5, 2)
-# WORKLIST = {key: val for key, val in zip(cust, tims)}
+# WORKLIST = defaultdict(float)
+cust = ("Client1", "Client2")
+tims = (1.5, 2)
+WORKLIST = {key: val for key, val in zip(cust, tims)}
 
 class Timer:
     """
@@ -76,7 +76,7 @@ class MyWindow(Frame, Timer):
         self.filemenu.add_command(label='Save Timesheet', command=self.write)
         self.menubar.add_cascade(label='Edit', menu=self.editbar)
         self.editbar.add_command(label='Manual adjustment', command=self.manual_entry_window)
-        self.editbar.add_command(label='Current timesheet', command=self.get_current_timesheet)
+        self.editbar.add_command(label='Current timesheet', command=self.view_timesheet_window)
 
 
     def manual_entry_window(self):
@@ -95,6 +95,14 @@ class MyWindow(Frame, Timer):
         self.my_entry.pack(side='left')
         b3.pack(side='left')
         b4.pack(side='right')
+
+    def view_timesheet_window(self):
+        """Creates the child window for Current Timesheet"""
+        w = Toplevel()
+        box = Listbox(w)
+        box.pack()
+        for key, val in self.get_current_timesheet().items():
+            box.insert(END, (key, val))
 
     def update_worklist_helper(self):
         """
