@@ -13,14 +13,16 @@ CLIENTS = ("Boathouse Row I", "Boathouse Row II",
            "PMSMF", "PMSF", "PMSF(L)", "PMSF US LP", "Tewks",
            "CitcoOne", "Admin", "Training", "AOL", "NPIC")
 WORKLIST = defaultdict(float)
-
+# cust = ("Client1", "Client2")
+# tims = (1.5, 2)
+# WORKLIST = {key: val for key, val in zip(cust, tims)}
 
 class Timer:
     """
     Returns the elapsed time in seconds between
     2 datetime objects
     """
-
+    timer_running = False
     def __init__(self):
         self.start = None
         self.stop = None
@@ -28,10 +30,12 @@ class Timer:
     def time_start(self):
         """Starts the timer"""
         self.start = datetime.now()
+        self.timer_running = True
 
     def time_stop(self):
         """Stops the timer, resets the state time to zero"""
         self.stop = datetime.now()
+        self.timer_running = False
 
     @property
     def elapsed_time(self):
@@ -72,6 +76,8 @@ class MyWindow(Frame, Timer):
         self.filemenu.add_command(label='Save Timesheet', command=self.write)
         self.menubar.add_cascade(label='Edit', menu=self.editbar)
         self.editbar.add_command(label='Manual adjustment', command=self.manual_entry_window)
+        self.editbar.add_command(label='Current timesheet', command=self.get_current_timesheet)
+
 
     def manual_entry_window(self):
         """Creates the child window for Manual Entries"""
@@ -110,6 +116,18 @@ class MyWindow(Frame, Timer):
             WORKLIST[customer] += float(time)
         except ValueError:
             messagebox.showinfo(title="Warning", message="Please enter a number")
+
+
+    def get_current_timesheet(self):
+        """Create a copy of the current worklist and current client and time"""
+        if self.timer_running:
+            temp_workist = WORKLIST.copy()
+            temp_client = self.client(self)
+            temp_time = round(self.split_time / 3600, 1)
+            temp_workist[temp_client] += temp_time
+            return temp_workist
+        return WORKLIST
+
 
     def time_start(self):
         """
@@ -172,6 +190,5 @@ def main():
     top = MyWindow(top)
     top.grid()
     top.mainloop()
-
 
 main()
