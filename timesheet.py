@@ -12,10 +12,8 @@ import os
 CLIENTS = ("Boathouse Row I", "Boathouse Row II",
            "PMSMF", "PMSF", "PMSF(L)", "PMSF US LP", "Tewks",
            "CitcoOne", "Admin", "Training", "AOL", "NPIC")
-# WORKLIST = defaultdict(float)
-cust = ("Client1", "Client2")
-tims = (1.5, 2)
-WORKLIST = {key: val for key, val in zip(cust, tims)}
+WORKLIST = defaultdict(float)
+
 
 class Timer:
     """
@@ -23,6 +21,7 @@ class Timer:
     2 datetime objects
     """
     timer_running = False
+
     def __init__(self):
         self.start = None
         self.stop = None
@@ -78,7 +77,6 @@ class MyWindow(Frame, Timer):
         self.editbar.add_command(label='Manual adjustment', command=self.manual_entry_window)
         self.editbar.add_command(label='Current timesheet', command=self.view_timesheet_window)
 
-
     def manual_entry_window(self):
         """Creates the child window for Manual Entries"""
         t = Toplevel(self, width=250, height=100)
@@ -125,7 +123,6 @@ class MyWindow(Frame, Timer):
         except ValueError:
             messagebox.showinfo(title="Warning", message="Please enter a number")
 
-
     def get_current_timesheet(self):
         """Create a copy of the current worklist and current client and time"""
         if self.timer_running:
@@ -135,7 +132,6 @@ class MyWindow(Frame, Timer):
             temp_workist[temp_client] += temp_time
             return temp_workist
         return WORKLIST
-
 
     def time_start(self):
         """
@@ -198,5 +194,6 @@ def main():
     top = MyWindow(top)
     top.grid()
     top.mainloop()
+
 
 main()
