@@ -100,7 +100,8 @@ class MyWindow(Frame, Timer):
         box = Listbox(w)
         box.pack()
         for key, val in self.get_current_timesheet().items():
-            box.insert(END, (key, val))
+            entry = '{}: {}'.format(key, val)
+            box.insert(END, entry)
 
     def update_worklist_helper(self):
         """
