@@ -129,7 +129,10 @@ class MyWindow(Frame, Timer):
             messagebox.showinfo(title="Warning", message="Please enter a number")
 
     def get_current_timesheet(self):
-        """Create a copy of the current worklist and current client and time"""
+        """
+        If a Timer is running, returns an up-to-date WORKLIST
+        If there is no current Timer running, returns the WORKLIST
+        """
         if self.timer_running:
             temp_workist = WORKLIST.copy()
             temp_client = self.client(self)
@@ -171,8 +174,12 @@ class MyWindow(Frame, Timer):
         """Returns the value from Manual Entry Combobox"""
         return self.c1.get()
 
-    @staticmethod
-    def write():
+    def write(self):
+        """Save the contents of WORKLIST to a new or existing file"""
+        is_new_file = False
+        # If a Timer is running, don't allow a save
+        if self.timer_running:
+            return messagebox.showwarning("Save Error", "You have a timer running. Please stop the timer to proceed")
         file_path = str(filedialog.asksaveasfilename(defaultextension='.csv', initialdir=os.getcwd()))
         """
         Format explainer:
@@ -181,7 +188,6 @@ class MyWindow(Frame, Timer):
         %B = Month full name
         """
         day = datetime.now().strftime("%A %d %B")
-        is_new_file = False
         if file_path:
             if not os.path.isfile(file_path):
                 is_new_file = True
@@ -191,7 +197,7 @@ class MyWindow(Frame, Timer):
                     writer.writerow(["Day", "Client", "Time"])
                 for key, val in WORKLIST.items():
                     writer.writerow([day, key, val])
-
+            WORKLIST.clear()
 
 def main():
     top = Tk()
