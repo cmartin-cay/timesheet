@@ -99,9 +99,13 @@ class MyWindow(Frame, Timer):
         w = Toplevel()
         box = Listbox(w)
         box.pack()
-        for key, val in self.get_current_timesheet().items():
-            entry = '{}: {}'.format(key, val)
+        temp_dict = self.get_current_timesheet()
+        for key, val in temp_dict.items():
+            entry = '{} {}'.format(key, val)
             box.insert(END, entry)
+        # Include a total time at the bottom
+        total = '{} {}'.format('Total Time', sum(temp_dict.values()))
+        box.insert(END, total)
 
     def update_worklist_helper(self):
         """
