@@ -47,14 +47,15 @@ class Timer:
         return (datetime.now() - self.start).seconds
 
 
-class MyWindow(Frame, Timer):
+class MyWindow(Tk, Timer):
     """
     Main Tkinter window. Probably. Don't really know much
     Tkinter yet.
     """
 
-    def __init__(self, master):
-        Frame.__init__(self, master)
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
         self.top_menu()
         self.c = ttk.Combobox(self, state=NORMAL)
         self.c['values'] = sorted(CLIENTS)
@@ -64,10 +65,11 @@ class MyWindow(Frame, Timer):
         self.c.grid(columnspan=2)
         self.b1.grid(sticky=W, row=1, column=0)
         self.b2.grid(sticky=E, row=1, column=1)
-        master.configure(menu=self.menubar)
+        self.config(menu=self.menubar)
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def top_menu(self):
-        self.menubar = Menu(self)
+        self.menubar = Menu(self.parent)
         self.filemenu = Menu(self, tearoff=False)
         self.editbar = Menu(self, tearoff=False)
         self.menubar.add_cascade(label='File', menu=self.filemenu)
@@ -199,12 +201,18 @@ class MyWindow(Frame, Timer):
                     writer.writerow([day, key, val])
             WORKLIST.clear()
 
+    def on_close(self):
+        """Ensure that WORKLIST is empty i.e. all data has been saved"""
+        if WORKLIST:
+            if messagebox.askokcancel("Exit?", "You have not saved. Do you want to exit"):
+                self.destroy()
+
+
 def main():
-    top = Tk()
-    top.title("Time Manager")
-    top = MyWindow(top)
-    top.grid()
-    top.mainloop()
+    app = MyWindow(None)
+    app.title("Time Manager")
+    app.grid()
+    app.mainloop()
 
 
 main()
