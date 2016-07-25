@@ -206,6 +206,7 @@ class MyWindow(Tk, Timer):
         if WORKLIST:
             if messagebox.askokcancel("Exit?", "You have not saved. Do you want to exit"):
                 self.destroy()
+        self.destroy()
 
 
 def main():
