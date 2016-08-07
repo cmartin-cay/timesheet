@@ -8,11 +8,20 @@ from datetime import datetime
 from collections import defaultdict
 import csv
 import os
+import json
 
 CLIENTS = ("Boathouse Row I", "Boathouse Row II",
            "PMSMF", "PMSF", "PMSF(L)", "PMSF US LP", "Tewks",
            "CitcoOne", "Admin", "Training", "AOL", "NPIC")
-WORKLIST = defaultdict(float)
+
+# If 'tmp_save.json' exists, the system must have crashed on exit
+# and not deleted the file. Restore the contents to get an up to date WORKLIST
+try:
+    with open('tmp_save.json', 'r') as fp:
+        WORKLIST = json.load(fp)
+        WORKLIST = defaultdict(float, WORKLIST)
+except FileNotFoundError:
+    WORKLIST = defaultdict(float)
 
 
 class Timer:
@@ -218,3 +227,4 @@ def main():
 
 
 main()
+#TODO Current timesheet window: Rounding & Expandable
