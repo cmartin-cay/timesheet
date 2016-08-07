@@ -13,11 +13,12 @@ import json
 CLIENTS = ("Boathouse Row I", "Boathouse Row II",
            "PMSMF", "PMSF", "PMSF(L)", "PMSF US LP", "Tewks",
            "CitcoOne", "Admin", "Training", "AOL", "NPIC")
+TMP_SAVE = 'tmp_save.json'
 
 # If 'tmp_save.json' exists, the system must have crashed on exit
 # and not deleted the file. Restore the contents to get an up to date WORKLIST
 try:
-    with open('tmp_save.json', 'r') as fp:
+    with open(TMP_SAVE, 'r') as fp:
         WORKLIST = json.load(fp)
         WORKLIST = defaultdict(float, WORKLIST)
 except FileNotFoundError:
@@ -185,6 +186,16 @@ class MyWindow(Tk, Timer):
         """Returns the value from Manual Entry Combobox"""
         return self.c1.get()
 
+    def delete_autosave(self):
+        """Delete the contents of the temp save file"""
+        try:
+            os.remove(TMP_SAVE)
+        except FileNotFoundError:
+            pass
+        except PermissionError:
+            #TODO raise an error window
+            pass
+
     def write(self):
         """Save the contents of WORKLIST to a new or existing file"""
         is_new_file = False
@@ -209,11 +220,13 @@ class MyWindow(Tk, Timer):
                 for key, val in WORKLIST.items():
                     writer.writerow([day, key, val])
             WORKLIST.clear()
+            self.delete_autosave()
 
     def on_close(self):
         """Ensure that WORKLIST is empty i.e. all data has been saved"""
         if WORKLIST:
             if messagebox.askokcancel("Exit?", "You have not saved. Do you want to exit"):
+                self.delete_autosave()
                 self.destroy()
         else:
             self.destroy()
