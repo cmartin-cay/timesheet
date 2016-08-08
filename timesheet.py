@@ -19,8 +19,8 @@ TMP_SAVE = 'tmp_save.json'
 # and not deleted the file. Restore the contents to get an up to date WORKLIST
 try:
     with open(TMP_SAVE, 'r') as fp:
-        WORKLIST = json.load(fp)
-        WORKLIST = defaultdict(float, WORKLIST)
+        data = json.load(fp)
+        WORKLIST = defaultdict(float, data)
 except FileNotFoundError:
     WORKLIST = defaultdict(float)
 
@@ -186,6 +186,13 @@ class MyWindow(Tk, Timer):
         """Returns the value from Manual Entry Combobox"""
         return self.c1.get()
 
+    def autosave(self):
+        """Save the WORKLIST to TMP_SAVE every 15 minutes"""
+        with open(TMP_SAVE, 'w') as fp:
+            json.dump(self.get_current_timesheet(), fp)
+        self.after(1000 * 60 * 15, self.autosave)
+
+
     def delete_autosave(self):
         """Delete the contents of the temp save file"""
         try:
@@ -229,6 +236,7 @@ class MyWindow(Tk, Timer):
                 self.delete_autosave()
                 self.destroy()
         else:
+            self.delete_autosave()
             self.destroy()
 
 
@@ -236,6 +244,7 @@ def main():
     app = MyWindow(None)
     app.title("Time Manager")
     app.grid()
+    app.after(100, app.autosave())
     app.mainloop()
 
 
