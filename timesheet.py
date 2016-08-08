@@ -20,7 +20,10 @@ TMP_SAVE = 'tmp_save.json'
 try:
     with open(TMP_SAVE, 'r') as fp:
         data = json.load(fp)
-        WORKLIST = defaultdict(float, data)
+        if messagebox.askokcancel("Existing timesheet found. Import it?"):
+            WORKLIST = defaultdict(float, data)
+        else:
+            WORKLIST = defaultdict(float)
 except FileNotFoundError:
     WORKLIST = defaultdict(float)
 
