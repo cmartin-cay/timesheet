@@ -10,7 +10,9 @@ import csv
 import os
 import json
 
-
+CLIENTS = ("Boathouse Row I", "Boathouse Row II",
+                   "PMSMF", "PMSF", "PMSF(L)", "PMSF US LP", "Tewks",
+                   "CitcoOne", "Admin", "Training", "AOL", "NPIC")
 
 class Timer:
     """
@@ -56,7 +58,7 @@ class MyWindow(Tk, Timer):
         self.top_menu()
         self.startup_logic()
         self.c = ttk.Combobox(self, state=NORMAL)
-        self.c['values'] = sorted(self.clients)
+        self.c['values'] = sorted(CLIENTS)
         self.c.bind('<<ComboboxSelected>>', self.client)
         self.b1 = Button(self, text="Start", command=self.time_start)
         self.b2 = Button(self, text="Stop", state=DISABLED, command=self.time_stop)
@@ -67,16 +69,16 @@ class MyWindow(Tk, Timer):
         self.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def startup_logic(self):
-        self.clients = ("Boathouse Row I", "Boathouse Row II",
-                   "PMSMF", "PMSF", "PMSF(L)", "PMSF US LP", "Tewks",
-                   "CitcoOne", "Admin", "Training", "AOL", "NPIC")
         self.tmp_save = 'tmp_save.json'
         # If 'tmp_save.json' exists, the system must have crashed on exit
         # and not deleted the file. Restore the contents to get an up to date WORKLIST
         try:
             with open(self.tmp_save, 'r') as fp:
                 data = json.load(fp)
-                self.worklist = defaultdict(float, data)
+                if messagebox.askokcancel("Found timsheet", "Import existing timehseet?"):
+                    self.worklist = defaultdict(float, data)
+                else:
+                    self.worklist = defaultdict(float)
         except FileNotFoundError:
             self.worklist = defaultdict(float)
 
@@ -96,7 +98,7 @@ class MyWindow(Tk, Timer):
         t = Toplevel(self, width=250, height=100)
         t.title = 'Change time'
         self.c1 = ttk.Combobox(t, state=NORMAL)
-        self.c1['values'] = sorted(self.clients)
+        self.c1['values'] = sorted(CLIENTS)
         self.c1.bind('<<ComboboxSelected>>', self.client_manual)
         self.my_label = Label(t, text="Enter time")
         self.my_entry = Entry(t, width=4)
