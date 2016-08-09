@@ -10,19 +10,6 @@ import csv
 import os
 import json
 
-CLIENTS = ("Boathouse Row I", "Boathouse Row II",
-           "PMSMF", "PMSF", "PMSF(L)", "PMSF US LP", "Tewks",
-           "CitcoOne", "Admin", "Training", "AOL", "NPIC")
-TMP_SAVE = 'tmp_save.json'
-
-# If 'tmp_save.json' exists, the system must have crashed on exit
-# and not deleted the file. Restore the contents to get an up to date WORKLIST
-try:
-    with open(TMP_SAVE, 'r') as fp:
-        data = json.load(fp)
-        WORKLIST = defaultdict(float, data)
-except FileNotFoundError:
-    WORKLIST = defaultdict(float)
 
 
 class Timer:
@@ -67,8 +54,9 @@ class MyWindow(Tk, Timer):
         super().__init__()
         self.parent = parent
         self.top_menu()
+        self.startup_logic()
         self.c = ttk.Combobox(self, state=NORMAL)
-        self.c['values'] = sorted(CLIENTS)
+        self.c['values'] = sorted(self.clients)
         self.c.bind('<<ComboboxSelected>>', self.client)
         self.b1 = Button(self, text="Start", command=self.time_start)
         self.b2 = Button(self, text="Stop", state=DISABLED, command=self.time_stop)
@@ -77,6 +65,20 @@ class MyWindow(Tk, Timer):
         self.b2.grid(sticky=E, row=1, column=1)
         self.config(menu=self.menubar)
         self.protocol("WM_DELETE_WINDOW", self.on_close)
+
+    def startup_logic(self):
+        self.clients = ("Boathouse Row I", "Boathouse Row II",
+                   "PMSMF", "PMSF", "PMSF(L)", "PMSF US LP", "Tewks",
+                   "CitcoOne", "Admin", "Training", "AOL", "NPIC")
+        self.tmp_save = 'tmp_save.json'
+        # If 'tmp_save.json' exists, the system must have crashed on exit
+        # and not deleted the file. Restore the contents to get an up to date WORKLIST
+        try:
+            with open(self.tmp_save, 'r') as fp:
+                data = json.load(fp)
+                self.worklist = defaultdict(float, data)
+        except FileNotFoundError:
+            self.worklist = defaultdict(float)
 
     def top_menu(self):
         self.menubar = Menu(self.parent)
@@ -94,7 +96,7 @@ class MyWindow(Tk, Timer):
         t = Toplevel(self, width=250, height=100)
         t.title = 'Change time'
         self.c1 = ttk.Combobox(t, state=NORMAL)
-        self.c1['values'] = sorted(CLIENTS)
+        self.c1['values'] = sorted(self.clients)
         self.c1.bind('<<ComboboxSelected>>', self.client_manual)
         self.my_label = Label(t, text="Enter time")
         self.my_entry = Entry(t, width=4)
@@ -136,7 +138,7 @@ class MyWindow(Tk, Timer):
         customer = self.client_manual(self)
         try:
             float(time)
-            WORKLIST[customer] += float(time)
+            self.worklist[customer] += float(time)
         except ValueError:
             messagebox.showinfo(title="Warning", message="Please enter a number")
 
@@ -146,12 +148,12 @@ class MyWindow(Tk, Timer):
         If there is no current Timer running, returns the WORKLIST
         """
         if self.timer_running:
-            temp_workist = WORKLIST.copy()
+            temp_workist = self.worklist.copy()
             temp_client = self.client(self)
             temp_time = round(self.split_time / 3600, 1)
             temp_workist[temp_client] += temp_time
             return temp_workist
-        return WORKLIST
+        return self.worklist
 
     def time_start(self):
         """
@@ -176,7 +178,7 @@ class MyWindow(Tk, Timer):
         self.c.config(state=NORMAL)
         self.b1.config(state=NORMAL)
         self.b2.config(state=DISABLED)
-        WORKLIST[self.client(self)] += round(self.elapsed_time / 3600, 1)
+        self.worklist[self.client(self)] += round(self.elapsed_time / 3600, 1)
 
     def client(self, args):
         """Returns the value from Combobox"""
@@ -188,7 +190,7 @@ class MyWindow(Tk, Timer):
 
     def autosave(self):
         """Save the WORKLIST to TMP_SAVE every 15 minutes"""
-        with open(TMP_SAVE, 'w') as fp:
+        with open(self.tmp_save, 'w') as fp:
             json.dump(self.get_current_timesheet(), fp)
         self.after(1000 * 60 * 15, self.autosave)
 
@@ -196,7 +198,7 @@ class MyWindow(Tk, Timer):
     def delete_autosave(self):
         """Delete the contents of the temp save file"""
         try:
-            os.remove(TMP_SAVE)
+            os.remove(self.tmp_save)
         except FileNotFoundError:
             pass
         except PermissionError:
@@ -224,14 +226,14 @@ class MyWindow(Tk, Timer):
                 writer = csv.writer(csvfile, delimiter=",")
                 if is_new_file:
                     writer.writerow(["Day", "Client", "Time"])
-                for key, val in WORKLIST.items():
+                for key, val in self.worklist.items():
                     writer.writerow([day, key, val])
-            WORKLIST.clear()
+            self.worklist.clear()
             self.delete_autosave()
 
     def on_close(self):
         """Ensure that WORKLIST is empty i.e. all data has been saved"""
-        if WORKLIST:
+        if self.worklist:
             if messagebox.askokcancel("Exit?", "You have not saved. Do you want to exit"):
                 self.delete_autosave()
                 self.destroy()
