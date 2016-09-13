@@ -75,10 +75,11 @@ class MyWindow(Tk, Timer):
         try:
             with open(self.tmp_save, 'r') as fp:
                 data = json.load(fp)
-                if messagebox.askokcancel("Found timsheet", "Import existing timehseet?"):
+                if messagebox.askokcancel("Found timesheet", "Import existing timehseet?"):
                     self.worklist = defaultdict(float, data)
                 else:
                     self.worklist = defaultdict(float)
+                    self.delete_autosave()
         except FileNotFoundError:
             self.worklist = defaultdict(float)
 
