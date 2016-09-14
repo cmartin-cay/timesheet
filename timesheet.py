@@ -114,8 +114,10 @@ class MyWindow(Tk, Timer):
     def view_timesheet_window(self):
         """Creates the child window for Current Timesheet"""
         w = Toplevel()
+        w.rowconfigure(0, weight=1)
+        w.columnconfigure(0, weight=1)
         box = Listbox(w)
-        box.pack()
+        box.grid(sticky = "NSEW")
         temp_dict = self.get_current_timesheet()
         for key, val in temp_dict.items():
             entry = '{} {}'.format(key, val)
