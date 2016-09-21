@@ -120,7 +120,7 @@ class MyWindow(Tk, Timer):
         box.grid(sticky = "NSEW")
         temp_dict = self.get_current_timesheet()
         for key, val in temp_dict.items():
-            entry = '{} {.1f}'.format(key, val)
+            entry = '{} {:.1f}'.format(key, val)
             box.insert(END, entry)
         # Include a total time at the bottom
         total = '{} {}'.format('Total Time', sum(temp_dict.values()))
@@ -251,8 +251,9 @@ def main():
     app = MyWindow(None)
     app.title("Time Manager")
     app.grid()
-    app.after(1000 * 60 * 15, app.autosave())
+    app.after(0, app.autosave())
     app.mainloop()
 
 
 main()
+#TODO Ability to update client list from inside the app
